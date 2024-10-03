@@ -49,8 +49,12 @@ for key, selector in query_selector_result.items():
     try:
         new_selector = selector.replace("[", "\\[").replace("]", "\\]")
         print("# Selector: ", new_selector)
-        elem = driver.find_element(By.CSS_SELECTOR, new_selector)
-        print(f"{key}: {elem.text}")
+        # Use find_elements to get a list of matching elements
+        elems = driver.find_elements(By.CSS_SELECTOR, new_selector)
+        
+        # Concatenate their text content
+        combined_text = " ".join(elem.text for elem in elems)
+        print(f"{key}: {combined_text}")
     except Exception as e:
         print(f"Error finding {key}: {e}")
 

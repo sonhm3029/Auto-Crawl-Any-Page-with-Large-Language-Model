@@ -9,12 +9,18 @@ import os
 
 
 PROMPT = """
-## Given the website html:
+## Given the website HTML:
 {context}
 
-## Find me the css query selector of the element that contain the following information:
+## Find me the CSS query selector of the element that contains the following information:
 {list_fields}
+
+## Guidelines:
+- If the information is contained within a single tag (like <h1> for product names), return that tag.
+- If the information is wrapped in multiple tags (like <p> within a <div> for descriptions), return the wrapping element (the <div>).
+- Ensure the selector is the closest ancestor that contains the relevant information.
 """
+
 
 
 
