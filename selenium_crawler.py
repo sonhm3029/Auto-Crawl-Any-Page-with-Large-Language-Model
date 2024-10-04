@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from pymongo import MongoClient
 from multiprocessing import Pool, cpu_count
+from tqdm import tqdm
 
 # Load environment variables
 load_dotenv()
@@ -19,7 +20,7 @@ def crawl_urls(url_batch):
     # Create a single instance of the browser for the batch
     driver = webdriver.Chrome()
 
-    for item in url_batch:
+    for item in tqdm(url_batch):
         url = item.get("url")
         if not url:
             continue
@@ -30,7 +31,15 @@ def crawl_urls(url_batch):
             
             # Extract data
             title = driver.find_element(By.TAG_NAME, "h1").text
-            price = driver.find_element(By.CSS_SELECTOR, "div.text-20.text-red-price").text
+            
+            flagPrice = False
+            try:
+                price = driver.find_element(By.CSS_SELECTOR, "div.text-20.text-red-price").text
+            except Exception as e:
+                flagPrice = True
+            if flagPrice:
+                price = driver.find_element(By.CSS_SELECTOR, "div.swiper-list-cate-search div.swiper-slide-active div.flex.flex-col div:nth-child(1)").text
+                
             description = driver.find_element(By.CSS_SELECTOR, "div.detail-style").text
             
             # Store data in MongoDB
@@ -43,7 +52,8 @@ def crawl_urls(url_batch):
             collection.insert_one(new_data)
         
         except Exception as e:
-            print(f"ERROR crawling {url}")
+            with open("error.txt", "a") as f:
+                f.write(f"ERROR crawling {url}\n")
     
     # Close the browser once the batch is processed
     driver.quit()
